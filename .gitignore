@@ -1,0 +1,13 @@
+/notes.txt
+/notes.md
+/tmp/*
+/test.sh
+test.sh
+/logs/*
+tmp/*
+/.idea
+.ropeproject
+__pycache__
+__init__.py
+/projects.csv
+/.env
