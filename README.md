@@ -11,7 +11,19 @@ remoto, actualizar db remota/local.
 
 ## Installation
 
-WIP
+Primero descargamos el proyecto desde el repositorio oficial
+
+```bash
+git clone https://gitlab.com/fryntiz/tools-server-scripts.git
+cd tools-server-scripts
+```
+
+Ahora copiamos el archivo .env.example al .env y editamos los valores que 
+contiene estableciendo los que deseamos utilizar.
+
+```bash
+cp .env.example .env
+```
 
 ## Usage
 
