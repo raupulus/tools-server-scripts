@@ -52,8 +52,7 @@ mysqlBackup() {
   local user=$2
   local password=$3
   local database=$4
-  local backupFile=$5
-  local port=$6
+  local port=$5
 
   if [[ -z "$port" ]]; then
     port=3306
@@ -72,11 +71,6 @@ mysqlBackup() {
     return 1
   fi
 
-  if [[ -z "$backupFile" ]]; then
-    echo "No backup file specified"
-    return 1
-  fi
-
   if [[ -z "$host" ]]; then
     echo "No host specified"
     return 1
@@ -88,7 +82,46 @@ mysqlBackup() {
 
   backupName="Backup-${database}-$(date +%F_%H.%M.%S)"
 
-  echo -e "${RO}Backing up $database${CL}"
+  echo -e "${RO}Backing up${RO} ${database}${CL}"
 
-  mysqldump -h $host -P $port -u $user -p$password $database > "/tmp/tss/mysql/${backupName}" && cp "/tmp/tss/mysql/${backupName}" $backupFile
+  mysqldump -h $host -P $port -u $user -p$password $database > "/tmp/tss/mysql/${backupName}" && cp "/tmp/tss/mysql/${backupName}" "${PATH_BACKUPS}/$backupName"
+}
+
+mysqlBackupLocal() {
+    showProjects
+
+    while true :; do
+            read -p 'Introduce proyecto para crear el backup → ' input
+
+            if [[ $input -lt "${#PROJECTS[@]}" ]] ||
+               [[ $input -eq "${#PROJECTS[@]}" ]]; then
+
+                database=${PROJECTS_USERS[$input]}
+
+                #TODO → Plantear guardar nombre del proyecto en git dentro de projects.csv
+
+                checkIfExists=`mysql -u $MYSQL_USER -p --skip-column-names \
+                 -e "SHOW DATABASES LIKE '${database}'"`
+
+                if [[ -z "${PROJECTS[$input]}" ]] || [[ -z $checkIfExists ]]; then
+                    echo -e "${VE}No existe la base de datos${RO} ${PROJECTS_USERS[${input}]}${CL}"
+                    continue
+                fi
+
+                echo -e "${VE}Se generará un backup de la DB ${PROJECTS_USERS[${input}]}"
+                echo ''
+                echo -e "${RO}¿Seguro que quieres continuar?${CL}"
+                read -p '  s/N → ' SN
+
+                ## Realizo el backup con los datos
+                if [[ $SN == 's' ]] || [[ $SN == 'S' ]]; then
+                    mysqlBackup 'localhost' $MYSQL_USER '' $database
+                fi
+
+                echo -e "${VE}Proceso de Backup concluido, pulsa intro para continuar${CL}"
+                read in
+
+                break
+            fi
+        done
 }

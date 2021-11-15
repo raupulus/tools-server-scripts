@@ -106,7 +106,7 @@ menuPrincipal() {
             2) Actualizar repositorio master remoto
             3) Actualizar Storage desde Local a Remoto (Subir Storage)
             4) Actualizar Storage desde Remoto a Local (Descargar Storage)
-            5) Backup de la Base de Datos local (Aún no implementado)
+            5) Backup de la Base de Datos local
             6) Backup de la Base de Datos remota (Aún no implementado)
             7) Inyectar Base de Datos Local en servidor remoto (Aún no implementado)
             8) Inyectar Base de Datos Remota en servidor local (Aún no implementado)
@@ -137,6 +137,7 @@ menuPrincipal() {
             2) laravelUpdateRemoteRepository;;
             3) laravelUploadStorage;;
             4) laravelDownloadStorage;;
+            5) mysqlBackupLocal;;
 
             a) addNewServer;;
             e) nano "${WORKSCRIPT}/projects.csv";;

@@ -76,11 +76,24 @@ nuevoProyectoLaravel() {
     ## Subir datos al nuevo remoto
     git push
 
-    ## Editar .env local
+    ## Almaceno el nombre del repositorio creado para crear la base de datos
+    local repositoryName=$(echo $urlRepositorio | rev | cut -s -d '/' -f1 | rev | cut -s -d '.' -f1)
+
+    ## Almaceno si existe la base de datos
+    checkIfExists=`mysql -u $MYSQL_USER -p --skip-column-names \
+                     -e "SHOW DATABASES LIKE '${repositoryName}'"`
+
+    ## Crear base de datos en caso de no existir
+    if [[ -z $checkIfExists ]]; then
+        echo -e "${VE}Creando base de datos${RO} ${repositoryName}${CL}"
+        mysql -u $MYSQL_USER -p -e "CREATE DATABASE ${repositoryName}"
+    fi
+
+    ## Editar .env local TODO → modificar con "sed" variables personalizadas (db, localhost, etc)
     cp .env.example .env
     nano .env
 
-    #TOFIX → Parametrizar la configuración por tipo de proyecto/servidor
+    #TODO → Parametrizar la configuración por tipo de proyecto/servidor?
     composer1 install || composer install
 
     if [[ $LARAVEL_PHP_POST_INSTALL_COMMAND != '' ]]; then
@@ -98,7 +111,7 @@ nuevoProyectoLaravel() {
     fi
 
     ## Añado el proyecto a la lista de proyectos: projects.csv
-    echo "${nombreProyecto};${nombreProyecto};${servidoRemoto};" >>"${WORKSCRIPT}/projects.csv"
+    echo "${nombreProyecto};${nombreProyecto};${servidoRemoto};${repositoryName}" >>"${WORKSCRIPT}/projects.csv"
 }
 
 ##

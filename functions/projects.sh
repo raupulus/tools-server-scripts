@@ -46,7 +46,6 @@
 ##           FUNCTIONS            ##
 ####################################
 
-
 ##
 ## Lee los proyectos que hay en el archivo y los almacena en las variables
 ## PROJECTS, PROJECTS_USERS y PROJECTS_SERVERS.
@@ -57,6 +56,7 @@ readProjects() {
     PROJECTS=()
     PROJECTS_USERS=()
     PROJECTS_SERVERS=()
+    PROJECTS_REPOSITORIES=()
 
     ## Mete en un array la lista de todos los proyectos encontrados en projects
     while read project; do
@@ -64,6 +64,7 @@ readProjects() {
         local name=$(echo $project | cut -s -d ';' -f1)
         local user=$(echo $project | cut -s -d ';' -f2)
         local server=$(echo $project | cut -s -d ';' -f3)
+        local repositoryName=$(echo $project | cut -s -d ';' -f4)
 
         ## Ignoro líneas de información
         if [[ "${name}" == 'Nombre' ]] || [[ "${name}" == 'Name' ]]; then
@@ -72,9 +73,10 @@ readProjects() {
 
         PROJECTS_USERS+=("$user")
         PROJECTS_SERVERS+=("$server")
+        PROJECTS_REPOSITORIES+=("$repositoryName")
 
         ## Añado elemento al array
-        PROJECTS+=("${key};${name};${user};${server}")
+        PROJECTS+=("${key};${name};${user};${server};${repositoryName}")
 
         #echo $todo
         #echo "${todo[@]:(-1)}"  ## Muestra el último elemento
