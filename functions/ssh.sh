@@ -66,6 +66,10 @@ sshAddKeyToRemoteServer() {
             else
                 echo -e "${AM}No existe la clave pública ${clavePublicaSsh}$CL"
             fi
+
+            echo -e "$VE Pulsa cualquier tecla para continuar${CL}"
+
+            read in
             break
         fi
     done
