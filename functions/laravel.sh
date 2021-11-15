@@ -95,9 +95,9 @@ conectarServidor() {
             if [[ -f "$clavePrivadaSsh" ]]; then
                 ssh -i "$clavePrivadaSsh" \
                         ${usuarios[${input}-1]}@${servidores[${input}-1]} \
-                        -p 51514
+                        -p $puertoRemoto
             else
-                ssh ${usuarios[${input}-1]}@${servidores[${input}-1]} -p 51514
+                ssh ${usuarios[${input}-1]}@${servidores[${input}-1]} -p $puertoRemoto
             fi
             break
         fi
@@ -348,11 +348,87 @@ limpiarCacheLaravel() {
 }
 
 actualizarMasterRemoto() {
-    ssh-copy-id -p "${puertoRemoto}" -i "${clavePublicaSsh}" \
-                    "${usuarioRemoto}@${servidoRemoto}" git pull && \
-                    php artsan clear && \
-                    php artisan cache:clear && \
-                    php artisan config:clear && \
-                    php artisan route:clear && \
-                    composer1 dump-autoload || composer dump-autoload
+  todo=()
+      usuarios=()
+      servidores=()
+
+      ## Meter en un array lista de todos los proyectos encontrados en projects
+      while read project; do
+          nombre=$(echo $project | cut -s -d ';' -f1)
+          usuario=$(echo $project | cut -s -d ';' -f2)
+          servidor=$(echo $project | cut -s -d ';' -f3)
+
+          if [[ "$nombre" = 'Nombre' ]]; then
+              continue
+          fi
+
+          usuarios+=("$usuario")
+          servidores+=("$servidor")
+
+          todo+=("$project")  ## Añado elemento al array
+          #echo ${todo[@]}  ## Muestra todo
+
+          echo -e "${RO}${#todo[@]}) ${VE}${nombre}${AZ} (${usuario}@${servidor})${CL}"
+      done < "${WORKSCRIPT}/projects.csv"
+
+      #echo $todo
+      #echo "${todo[@]:(-1)}"  ## Muestra el último elemento
+      #echo "${#todo[@]}" ## Muestra longitud del array
+
+
+      while true :; do
+          read -p 'Introduce el servidor a conectar → ' input
+
+          if [[ $input -lt "${#todo[@]}" ]] ||
+             [[ $input -eq "${#todo[@]}" ]]; then
+              echo -e "${VE}Se ejecutará:${RO}
+              ssh -p "${puertoRemoto}" -i "${clavePublicaSsh}" \
+              ${usuarios[${input}-1]}@${servidores[${input}-1]} git pull && \
+              php artisan clear && \
+              php artisan cache:clear && \
+              php artisan config:clear && \
+              php artisan route:clear && \
+              composer1 dump-autoload || composer dump-autoload"
+              echo ''
+              echo -e "${RO}¿Seguro que quieres continuar?${CL}"
+              read -p '  s/N → ' SN
+
+              if [[ $SN = 's' ]] || [[ $SN = 'S' ]]; then
+                  if [[ -f "$clavePrivadaSsh" ]]; then
+                      echo "clave ${clavePrivadaSsh}"
+
+                      ssh -p "${puertoRemoto}" -i "${clavePrivadaSsh}" \
+                      ${usuarios[${input}-1]}@${servidores[${input}-1]} \
+                      "cd laravel; git pull
+                      php artisan clear && \
+                      php artisan cache:clear && \
+                      php artisan config:clear && \
+                      php artisan route:clear && \
+                      composer1 dump-autoload || composer dump-autoload"
+
+
+                  else
+                      ssh -p "${puertoRemoto}" \
+                      ${usuarios[${input}-1]}@${servidores[${input}-1]} \
+                      "cd laravel; git pull
+                      php artisan clear && \
+                      php artisan cache:clear && \
+                      php artisan config:clear && \
+                      php artisan route:clear && \
+                      composer1 dump-autoload || composer dump-autoload"
+                  fi
+              fi
+
+              echo -e "${VE}Se ha terminado de ejecutar, pulsa intro para continuar${CL}"
+              read in
+
+              break
+          fi
+      done
+
+
+
+
+
+
 }

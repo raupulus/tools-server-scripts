@@ -11,7 +11,9 @@ remoto, actualizar db remota/local.
 
 ## Installation
 
-Primero descargamos el proyecto desde el repositorio oficial
+Primero descargamos el proyecto desde el repositorio oficial a un directorio
+dónde no lo vayamos a mover más, para posteriormente enlazarlo mediante un 
+comando para el usuario.
 
 ```bash
 git clone https://gitlab.com/fryntiz/tools-server-scripts.git
@@ -24,6 +26,17 @@ contiene estableciendo los que deseamos utilizar.
 ```bash
 cp .env.example .env
 ```
+
+Ejecutamos el script y lo instalamos para el sistema, realmente se instalará
+para el usuario dentro de ${HOME}/.local/bin/tss
+
+```bash
+./main.sh
+```
+
+Una vez dentro de la herramienta, instalamos introduciendo la letra "i" y 
+pulsando enter. Esto generará el enlace hacia el directorio actual 
+permitiendo ejecutarlo desde cualquier lugar usando el comando **tss**.
 
 ## Usage
 

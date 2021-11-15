@@ -53,6 +53,10 @@ menuPrincipal() {
             4) Añadir clave SSH pública al servidor
             5) Actualizar repositorio master remoto
             6) Publicar WEB (Aún no implementado)
+            7) Backup de la Base de Datos local (Aún no implementado)
+            8) Backup de la Base de Datos remota (Aún no implementado)
+            9) Inyectar Base de Datos Local en servidor remoto (Aún no implementado)
+            10) Inyectar Base de Datos Remota en servidor local (Aún no implementado)
 
             a) Añadir nuevo servidor
             e) Editar servidor existente
