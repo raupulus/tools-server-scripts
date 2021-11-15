@@ -39,26 +39,56 @@
 ##          INSTRUCTIONS          ##
 ####################################
 ##
-## Funciones globales para todos los scripts y/o la herramienta.
+## Funciones para las operaciones sobre MySQL.
 ##
 
 ####################################
 ##           FUNCTIONS            ##
 ####################################
 
-##
-## Instala la herramienta para el usuario actual generando un enlace simbólico
-## para ejecutarlo desde cualquier directorio mediante "tss"
-##
-installTool() {
-    ## Crear enlace en ~/.local/bin/tss
-    echo -e "$RO Creando enlace de la herramienta desde ${PWD}/main.sh a ${HOME}/.local/bin/tss"
 
-    sleep 2
+mysqlBackup() {
+  local host=$1
+  local user=$2
+  local password=$3
+  local database=$4
+  local backupFile=$5
+  local port=$6
 
-    if [[ -L "${HOME}/.local/bin/tss" ]]; then
-        rm "${HOME}/.local/bin/tss"
-    fi
+  if [[ -z "$port" ]]; then
+    port=3306
+  fi
 
-    ln -s "${PWD}/main.sh" "${HOME}/.local/bin/tss"
+  if [[ -z "$user" ]]; then
+    user=root
+  fi
+
+  if [[ -z "$password" ]]; then
+    password=
+  fi
+
+  if [[ -z "$database" ]]; then
+    echo "No database specified"
+    return 1
+  fi
+
+  if [[ -z "$backupFile" ]]; then
+    echo "No backup file specified"
+    return 1
+  fi
+
+  if [[ -z "$host" ]]; then
+    echo "No host specified"
+    return 1
+  fi
+
+  if [[ ! -d '/tmp/tss/mysql' ]]; then
+    mkdir -p '/tmp/tss/mysql'
+  fi
+
+  backupName="Backup-${database}-$(date +%F_%H.%M.%S)"
+
+  echo -e "${RO}Backing up $database${CL}"
+
+  mysqldump -h $host -P $port -u $user -p$password $database > "/tmp/tss/mysql/${backupName}" && cp "/tmp/tss/mysql/${backupName}" $backupFile
 }

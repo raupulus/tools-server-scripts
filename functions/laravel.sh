@@ -1,4 +1,51 @@
 #!/usr/bin/env bash
+# -*- ENCODING: UTF-8 -*-
+
+## @author     Raúl Caro Pastorino
+## @email      raul@fryntiz.dev
+## @web        https://fryntiz.es
+## @gitlab     https://gitlab.com/fryntiz
+## @github     https://github.com/fryntiz
+## @twitter    https://twitter.com/fryntiz
+## @telegram   https://t.me/fryntiz
+
+## @bash        5.1 or later
+## Create Date: 2021
+## Project Repository: https://gitlab.com/fryntiz/tools-server-scripts
+
+##             Applied Style Guide:
+## @style      https://gitlab.com/fryntiz/bash-guide-style
+
+## Revision 0.01 - File Created
+## Additional Comments:
+
+## @license    https://wwww.gnu.org/licenses/gpl.txt
+## @copyright  Copyright © 2021 Raúl Caro Pastorino
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+####################################
+##          INSTRUCTIONS          ##
+####################################
+##
+## Script para las operaciones sobre laravel.
+##
+
+####################################
+##           FUNCTIONS            ##
+####################################
+
 
 nuevoProyectoLaravel() {
     read -p "Introduce el nombre del proyecto → " nombreProyecto
@@ -33,7 +80,7 @@ nuevoProyectoLaravel() {
     cp .env.example .env
     nano .env
 
-    #TOFIX → Parametrizar a configuración por tipo de proyecto/servidor
+    #TOFIX → Parametrizar la configuración por tipo de proyecto/servidor
     composer1 install || composer install
 
     if [[ $LARAVEL_PHP_POST_INSTALL_COMMAND != '' ]]; then
@@ -54,141 +101,22 @@ nuevoProyectoLaravel() {
     echo "${nombreProyecto};${nombreProyecto};${servidoRemoto};" >>"${WORKSCRIPT}/projects.csv"
 }
 
-conectarServidor() {
-    todo=()
-    usuarios=()
-    servidores=()
-
-    ## Meter en un array lista de todos los proyectos encontrados en projects
-    while read project; do
-        nombre=$(echo $project | cut -s -d ';' -f1)
-        usuario=$(echo $project | cut -s -d ';' -f2)
-        servidor=$(echo $project | cut -s -d ';' -f3)
-
-        if [[ "$nombre" == 'Nombre' ]]; then
-            continue
-        fi
-
-        usuarios+=("$usuario")
-        servidores+=("$servidor")
-
-        todo+=("$project") ## Añado elemento al array
-        #echo ${todo[@]}  ## Muestra todo
-
-        echo -e "${RO}${#todo[@]}) ${VE}${nombre}${AZ} (${usuario}@${servidor})${CL}"
-    done <"${WORKSCRIPT}/projects.csv"
-
-    #echo $todo
-    #echo "${todo[@]:(-1)}"  ## Muestra el último elemento
-    #echo "${#todo[@]}" ## Muestra longitud del array
-
-    ## foreach a $todo y crear un menú con while
-
-    while true :; do
-        read -p 'Introduce el servidor a conectar → ' input
-
-        if [[ $input -lt "${#todo[@]}" ]] ||
-            [[ $input -eq "${#todo[@]}" ]]; then
-            echo -e "${VE}Accediendo con el usuario:${RO} ${usuarios[${input} - 1]}$CL"
-            echo -e "${VE}Servidor:${RO} ${servidores[${input} - 1]}$CL"
-            sleep 2
-            if [[ -f "$clavePrivadaSsh" ]]; then
-                ssh -i "$clavePrivadaSsh" \
-                    ${usuarios[${input} - 1]}@${servidores[${input} - 1]} \
-                    -p $puertoRemoto
-            else
-                ssh ${usuarios[${input} - 1]}@${servidores[${input} - 1]} -p $puertoRemoto
-            fi
-            break
-        fi
-    done
-}
-
-## Añade la clave pública de ssh al servidor.
-agregarClaveSshServidor() {
-    todo=()
-    usuarios=()
-    servidores=()
-
-    ## Meter en un array lista de todos los proyectos encontrados en projects
-    while read project; do
-        nombre=$(echo $project | cut -s -d ';' -f1)
-        usuario=$(echo $project | cut -s -d ';' -f2)
-        servidor=$(echo $project | cut -s -d ';' -f3)
-
-        if [[ "$nombre" == 'Nombre' ]]; then
-            continue
-        fi
-
-        usuarios+=("$usuario")
-        servidores+=("$servidor")
-
-        todo+=("$project") ## Añado elemento al array
-
-        echo -e "${RO}${#todo[@]}) ${VE}${nombre}${AZ} (${usuario}@${servidor})${CL}"
-    done <"${WORKSCRIPT}/projects.csv"
-
-    while true :; do
-        read -p 'Introduce el servidor a conectar → ' input
-
-        if [[ $input -lt "${#todo[@]}" ]] ||
-            [[ $input -eq "${#todo[@]}" ]]; then
-            echo -e "${AM}Añadiendo clave ssh al servidor$CL"
-            echo -e "${VE}Accediendo con el usuario:${RO} ${usuarios[${input} - 1]}$CL"
-            echo -e "${VE}Servidor:${RO} ${servidores[${input} - 1]}$CL"
-            sleep 2
-            if [[ -f "$clavePublicaSsh" ]]; then
-                ssh-copy-id -i "$clavePublicaSsh" \
-                    ${usuarios[${input} - 1]}@${servidores[${input} - 1]} \
-                    -p 51514
-            else
-                echo -e "${AM}Añadiendo clave ssh al servidor$CL"
-            fi
-            break
-        fi
-    done
-}
-
-actualizarStorageRemoto() {
+##
+## Actualiza el storage remoto subiendo los archivos locales.
+##
+laravelUploadStorage() {
     if [[ ! -d "${PWD}/storage" ]]; then
         echo -e "${RO}No se encuentra el directorio storage en este proyecto$CL"
     fi
 
-    todo=()
-    usuarios=()
-    servidores=()
-
-    ## Meter en un array lista de todos los proyectos encontrados en projects
-    while read project; do
-        nombre=$(echo $project | cut -s -d ';' -f1)
-        usuario=$(echo $project | cut -s -d ';' -f2)
-        servidor=$(echo $project | cut -s -d ';' -f3)
-
-        if [[ "$nombre" == 'Nombre' ]]; then
-            continue
-        fi
-
-        usuarios+=("$usuario")
-        servidores+=("$servidor")
-
-        todo+=("$project") ## Añado elemento al array
-        #echo ${todo[@]}  ## Muestra todo
-
-        echo -e "${RO}${#todo[@]}) ${VE}${nombre}${AZ} (${usuario}@${servidor})${CL}"
-    done <"${WORKSCRIPT}/projects.csv"
-
-    #echo $todo
-    #echo "${todo[@]:(-1)}"  ## Muestra el último elemento
-    #echo "${#todo[@]}" ## Muestra longitud del array
-
-    ## foreach a $todo y crear un menú con while
+    showProjects
 
     while true :; do
         read -p 'Introduce el servidor a conectar → ' input
 
-        if [[ $input -lt "${#todo[@]}" ]] ||
-            [[ $input -eq "${#todo[@]}" ]]; then
-            echo -e "${VE}Se copiará:${RO} storage/app/ en ${usuarios[${input} - 1]}@${servidores[${input} - 1]}:/home/${usuarios[${input} - 1]}/laravel/storage"
+        if [[ $input -lt "${#PROJECTS[@]}" ]] ||
+            [[ $input -eq "${#PROJECTS[@]}" ]]; then
+            echo -e "${VE}Se copiará:${RO} storage/app/ en ${PROJECTS_USERS[${input} - 1]}@${PROJECTS_SERVERS[${input}]}:/home/${PROJECTS_USERS[${input}]}/laravel/storage"
             echo ''
             echo -e "${RO}¿Seguro que quieres continuar?"
             read -p '  s/N → ' SN
@@ -198,10 +126,10 @@ actualizarStorageRemoto() {
                     echo "clave ${clavePrivadaSsh}"
                     scp -P "$puertoRemoto" \
                         -i $clavePrivadaSsh \
-                        -r 'storage/app/' "${usuarios[${input} - 1]}@${servidores[${input} - 1]}:/home/${usuarios[${input} - 1]}/laravel/storage"
+                        -r 'storage/app/' "${PROJECTS_USERS[${input}]}@${PROJECTS_SERVERS[${input}]}:/home/${PROJECTS_USERS[${input}]}/laravel/storage"
                 else
                     scp -P "$puertoRemoto" \
-                        -r 'storage/app/' "${usuarios[${input} - 1]}@${servidores[${input} - 1]}:/home/${usuarios[${input} - 1]}/laravel/storage"
+                        -r 'storage/app/' "${PROJECTS_USERS[${input}]}@${PROJECTS_SERVERS[${input}]}:/home/${PROJECTS_USERS[${input}]}/laravel/storage"
                 fi
             fi
 
@@ -216,46 +144,19 @@ actualizarStorageRemoto() {
 ##
 ## Actualiza el storage local a partir del remoto elegido.
 ##
-actualizarStorageLocal() {
+laravelDownloadStorage() {
     if [[ ! -d "${PWD}/storage" ]]; then
         echo -e "${RO}No se encuentra el directorio storage en este proyecto$CL"
     fi
 
-    todo=()
-    usuarios=()
-    servidores=()
-
-    ## Meter en un array lista de todos los proyectos encontrados en projects
-    while read project; do
-        nombre=$(echo $project | cut -s -d ';' -f1)
-        usuario=$(echo $project | cut -s -d ';' -f2)
-        servidor=$(echo $project | cut -s -d ';' -f3)
-
-        if [[ "$nombre" == 'Nombre' ]]; then
-            continue
-        fi
-
-        usuarios+=("$usuario")
-        servidores+=("$servidor")
-
-        todo+=("$project") ## Añado elemento al array
-        #echo ${todo[@]}  ## Muestra todo
-
-        echo -e "${RO}${#todo[@]}) ${VE}${nombre}${AZ} (${usuario}@${servidor})${CL}"
-    done <"${WORKSCRIPT}/projects.csv"
-
-    #echo $todo
-    #echo "${todo[@]:(-1)}"  ## Muestra el último elemento
-    #echo "${#todo[@]}" ## Muestra longitud del array
-
-    ## foreach a $todo y crear un menú con while
+    showProjects
 
     while true :; do
         read -p 'Introduce el servidor a conectar → ' input
 
-        if [[ $input -lt "${#todo[@]}" ]] ||
-            [[ $input -eq "${#todo[@]}" ]]; then
-            echo -e "${VE}Se copiará:${RO} ${usuarios[${input} - 1]}@${servidores[${input} - 1]}:/home/${usuarios[${input} - 1]}/laravel/storage en storage/app/"
+        if [[ $input -lt "${#PROJECTS[@]}" ]] ||
+            [[ $input -eq "${#PROJECTS[@]}" ]]; then
+            echo -e "${VE}Se copiará:${RO} ${PROJECTS_USERS[${input}]}@${PROJECTS_SERVERS[${input}]}:/home/${PROJECTS_USERS[${input}]}/laravel/storage en storage/app/"
             echo ''
             echo -e "${RO}¿Seguro que quieres continuar?"
             read -p '  s/N → ' SN
@@ -265,10 +166,10 @@ actualizarStorageLocal() {
                     echo "clave ${clavePrivadaSsh}"
                     scp -P "$puertoRemoto" \
                         -i $clavePrivadaSsh \
-                        -r "${usuarios[${input} - 1]}@${servidores[${input} - 1]}:/home/${usuarios[${input} - 1]}/laravel/storage/app" 'storage'
+                        -r "${PROJECTS_USERS[${input}]}@${PROJECTS_SERVERS[${input}]}:/home/${PROJECTS_USERS[${input}]}/laravel/storage/app" 'storage'
                 else
                     scp -P "$puertoRemoto" \
-                        -r "${usuarios[${input} - 1]}@${servidores[${input} - 1]}:/home/${usuarios[${input} - 1]}/laravel/storage/app" 'storage'
+                        -r "${PROJECTS_USERS[${input}]}@${PROJECTS_SERVERS[${input}]}:/home/${PROJECTS_USERS[${input}]}/laravel/storage/app" 'storage'
                 fi
             fi
 
@@ -294,47 +195,25 @@ laravelClearLocalCache() {
     read in
 }
 
-actualizarMasterRemoto() {
-    todo=()
-    usuarios=()
-    servidores=()
-
-    ## Meter en un array lista de todos los proyectos encontrados en projects
-    while read project; do
-        nombre=$(echo $project | cut -s -d ';' -f1)
-        usuario=$(echo $project | cut -s -d ';' -f2)
-        servidor=$(echo $project | cut -s -d ';' -f3)
-
-        if [[ "$nombre" == 'Nombre' ]]; then
-            continue
-        fi
-
-        usuarios+=("$usuario")
-        servidores+=("$servidor")
-
-        todo+=("$project") ## Añado elemento al array
-        #echo ${todo[@]}  ## Muestra todo
-
-        echo -e "${RO}${#todo[@]}) ${VE}${nombre}${AZ} (${usuario}@${servidor})${CL}"
-    done <"${WORKSCRIPT}/projects.csv"
-
-    #echo $todo
-    #echo "${todo[@]:(-1)}"  ## Muestra el último elemento
-    #echo "${#todo[@]}" ## Muestra longitud del array
+##
+## Actualiza el repositorio remoto en un servidor.
+##
+laravelUpdateRemoteRepository() {
+    showProjects
 
     while true :; do
         read -p 'Introduce el servidor a conectar → ' input
 
-        if [[ $input -lt "${#todo[@]}" ]] ||
-            [[ $input -eq "${#todo[@]}" ]]; then
+        if [[ $input -lt "${#PROJECTS[@]}" ]] ||
+            [[ $input -eq "${#PROJECTS[@]}" ]]; then
             echo -e "${VE}Se ejecutará:${RO}
-              ssh -p "${puertoRemoto}" -i "${clavePublicaSsh}" \
-              ${usuarios[${input} - 1]}@${servidores[${input} - 1]} git pull && \
-              php artisan clear && \
-              php artisan cache:clear && \
-              php artisan config:clear && \
-              php artisan route:clear && \
-              composer1 dump-autoload || composer dump-autoload"
+ssh -p ${puertoRemoto} -i ${clavePublicaSsh} ${PROJECTS_USERS[${input}]}@${PROJECTS_SERVERS[${input}]}
+git pull &&
+php artisan clear &&
+php artisan cache:clear &&
+php artisan config:clear &&
+php artisan route:clear;
+composer1 dump-autoload || composer dump-autoload"
             echo ''
             echo -e "${RO}¿Seguro que quieres continuar?${CL}"
             read -p '  s/N → ' SN
@@ -344,7 +223,7 @@ actualizarMasterRemoto() {
                     echo "clave ${clavePrivadaSsh}"
 
                     ssh -t -p "${puertoRemoto}" -i "${clavePrivadaSsh}" \
-                        ${usuarios[${input} - 1]}@${servidores[${input} - 1]} \
+                        ${PROJECTS_USERS[${input}]}@${PROJECTS_SERVERS[${input}]} \
                         "cd laravel; git pull
                       php artisan clear && \
                       php artisan cache:clear && \
@@ -355,7 +234,7 @@ actualizarMasterRemoto() {
                 else
 
                     ssh -t -p "${puertoRemoto}" \
-                        ${usuarios[${input} - 1]}@${servidores[${input} - 1]} \
+                        ${PROJECTS_USERS[${input}]}@${PROJECTS_SERVERS[${input}]} \
                         "cd laravel; git pull
                       php artisan clear && \
                       php artisan cache:clear && \

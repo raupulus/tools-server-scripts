@@ -39,26 +39,10 @@
 ##          INSTRUCTIONS          ##
 ####################################
 ##
-## Funciones globales para todos los scripts y/o la herramienta.
+## Script para desplegar en servidor remoto un proyecto de laravel.
 ##
 
 ####################################
 ##           FUNCTIONS            ##
 ####################################
 
-##
-## Instala la herramienta para el usuario actual generando un enlace simbólico
-## para ejecutarlo desde cualquier directorio mediante "tss"
-##
-installTool() {
-    ## Crear enlace en ~/.local/bin/tss
-    echo -e "$RO Creando enlace de la herramienta desde ${PWD}/main.sh a ${HOME}/.local/bin/tss"
-
-    sleep 2
-
-    if [[ -L "${HOME}/.local/bin/tss" ]]; then
-        rm "${HOME}/.local/bin/tss"
-    fi
-
-    ln -s "${PWD}/main.sh" "${HOME}/.local/bin/tss"
-}

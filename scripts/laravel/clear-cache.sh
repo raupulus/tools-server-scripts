@@ -39,26 +39,21 @@
 ##          INSTRUCTIONS          ##
 ####################################
 ##
-## Funciones globales para todos los scripts y/o la herramienta.
+## Este script limpia el caché de Laravel.
 ##
 
-####################################
-##           FUNCTIONS            ##
-####################################
 
-##
-## Instala la herramienta para el usuario actual generando un enlace simbólico
-## para ejecutarlo desde cualquier directorio mediante "tss"
-##
-installTool() {
-    ## Crear enlace en ~/.local/bin/tss
-    echo -e "$RO Creando enlace de la herramienta desde ${PWD}/main.sh a ${HOME}/.local/bin/tss"
+php artisan clear-compiled
+php artisan cache:clear
+php artisan config:clear
+php artisan debugbar:clear
+#php artisan ide-helper:generate
+#php artisan ide-helper:meta
+#php artisan ide-helper:models
+php artisan optimize:clear
+php artisan package:discover
+php artisan queue:flush
+php artisan route:clear
+php artisan view:clear
 
-    sleep 2
-
-    if [[ -L "${HOME}/.local/bin/tss" ]]; then
-        rm "${HOME}/.local/bin/tss"
-    fi
-
-    ln -s "${PWD}/main.sh" "${HOME}/.local/bin/tss"
-}
+composer1 dump-autoload || composer dump-autoload
