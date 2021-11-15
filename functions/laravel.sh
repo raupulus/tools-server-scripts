@@ -42,16 +42,16 @@ nuevoProyectoLaravel() {
 
     ## Añadir clave a servidor ssh
     ssh-copy-id -p "${puertoRemoto}" -i "${clavePublicaSsh}" \
-                "${usuarioRemoto}@${servidoRemoto}"
+        "${usuarioRemoto}@${servidoRemoto}"
 
     ## TODO → Conectar al remoto, desplegar y configurar
     read -p '¿Subir al remoto? s/N → ' input
-    if [[ "$input" = 's' ]] || [[ "$input" = 'S' ]]; then
+    if [[ "$input" == 's' ]] || [[ "$input" == 'S' ]]; then
         echo 'no implementada esta parte'
     fi
 
     ## Añado el proyecto a la lista de proyectos: projects.csv
-    echo "${nombreProyecto};${nombreProyecto};${servidoRemoto};" >> "${WORKSCRIPT}/projects.csv"
+    echo "${nombreProyecto};${nombreProyecto};${servidoRemoto};" >>"${WORKSCRIPT}/projects.csv"
 }
 
 conectarServidor() {
@@ -65,18 +65,18 @@ conectarServidor() {
         usuario=$(echo $project | cut -s -d ';' -f2)
         servidor=$(echo $project | cut -s -d ';' -f3)
 
-        if [[ "$nombre" = 'Nombre' ]]; then
+        if [[ "$nombre" == 'Nombre' ]]; then
             continue
         fi
 
         usuarios+=("$usuario")
         servidores+=("$servidor")
 
-        todo+=("$project")  ## Añado elemento al array
+        todo+=("$project") ## Añado elemento al array
         #echo ${todo[@]}  ## Muestra todo
 
         echo -e "${RO}${#todo[@]}) ${VE}${nombre}${AZ} (${usuario}@${servidor})${CL}"
-    done < "${WORKSCRIPT}/projects.csv"
+    done <"${WORKSCRIPT}/projects.csv"
 
     #echo $todo
     #echo "${todo[@]:(-1)}"  ## Muestra el último elemento
@@ -88,16 +88,16 @@ conectarServidor() {
         read -p 'Introduce el servidor a conectar → ' input
 
         if [[ $input -lt "${#todo[@]}" ]] ||
-           [[ $input -eq "${#todo[@]}" ]]; then
-            echo -e "${VE}Accediendo con el usuario:${RO} ${usuarios[${input}-1]}$CL"
-            echo -e "${VE}Servidor:${RO} ${servidores[${input}-1]}$CL"
+            [[ $input -eq "${#todo[@]}" ]]; then
+            echo -e "${VE}Accediendo con el usuario:${RO} ${usuarios[${input} - 1]}$CL"
+            echo -e "${VE}Servidor:${RO} ${servidores[${input} - 1]}$CL"
             sleep 2
             if [[ -f "$clavePrivadaSsh" ]]; then
                 ssh -i "$clavePrivadaSsh" \
-                        ${usuarios[${input}-1]}@${servidores[${input}-1]} \
-                        -p $puertoRemoto
+                    ${usuarios[${input} - 1]}@${servidores[${input} - 1]} \
+                    -p $puertoRemoto
             else
-                ssh ${usuarios[${input}-1]}@${servidores[${input}-1]} -p $puertoRemoto
+                ssh ${usuarios[${input} - 1]}@${servidores[${input} - 1]} -p $puertoRemoto
             fi
             break
         fi
@@ -116,31 +116,31 @@ agregarClaveSshServidor() {
         usuario=$(echo $project | cut -s -d ';' -f2)
         servidor=$(echo $project | cut -s -d ';' -f3)
 
-        if [[ "$nombre" = 'Nombre' ]]; then
+        if [[ "$nombre" == 'Nombre' ]]; then
             continue
         fi
 
         usuarios+=("$usuario")
         servidores+=("$servidor")
 
-        todo+=("$project")  ## Añado elemento al array
+        todo+=("$project") ## Añado elemento al array
 
         echo -e "${RO}${#todo[@]}) ${VE}${nombre}${AZ} (${usuario}@${servidor})${CL}"
-    done < "${WORKSCRIPT}/projects.csv"
+    done <"${WORKSCRIPT}/projects.csv"
 
     while true :; do
         read -p 'Introduce el servidor a conectar → ' input
 
         if [[ $input -lt "${#todo[@]}" ]] ||
-           [[ $input -eq "${#todo[@]}" ]]; then
-              echo -e "${AM}Añadiendo clave ssh al servidor$CL"
-              echo -e "${VE}Accediendo con el usuario:${RO} ${usuarios[${input}-1]}$CL"
-              echo -e "${VE}Servidor:${RO} ${servidores[${input}-1]}$CL"
-              sleep 2
-              if [[ -f "$clavePublicaSsh" ]]; then
-                   ssh-copy-id -i "$clavePublicaSsh" \
-                        ${usuarios[${input}-1]}@${servidores[${input}-1]} \
-                        -p 51514
+            [[ $input -eq "${#todo[@]}" ]]; then
+            echo -e "${AM}Añadiendo clave ssh al servidor$CL"
+            echo -e "${VE}Accediendo con el usuario:${RO} ${usuarios[${input} - 1]}$CL"
+            echo -e "${VE}Servidor:${RO} ${servidores[${input} - 1]}$CL"
+            sleep 2
+            if [[ -f "$clavePublicaSsh" ]]; then
+                ssh-copy-id -i "$clavePublicaSsh" \
+                    ${usuarios[${input} - 1]}@${servidores[${input} - 1]} \
+                    -p 51514
             else
                 echo -e "${AM}Añadiendo clave ssh al servidor$CL"
             fi
@@ -164,18 +164,18 @@ actualizarStorageRemoto() {
         usuario=$(echo $project | cut -s -d ';' -f2)
         servidor=$(echo $project | cut -s -d ';' -f3)
 
-        if [[ "$nombre" = 'Nombre' ]]; then
+        if [[ "$nombre" == 'Nombre' ]]; then
             continue
         fi
 
         usuarios+=("$usuario")
         servidores+=("$servidor")
 
-        todo+=("$project")  ## Añado elemento al array
+        todo+=("$project") ## Añado elemento al array
         #echo ${todo[@]}  ## Muestra todo
 
         echo -e "${RO}${#todo[@]}) ${VE}${nombre}${AZ} (${usuario}@${servidor})${CL}"
-    done < "${WORKSCRIPT}/projects.csv"
+    done <"${WORKSCRIPT}/projects.csv"
 
     #echo $todo
     #echo "${todo[@]:(-1)}"  ## Muestra el último elemento
@@ -187,21 +187,21 @@ actualizarStorageRemoto() {
         read -p 'Introduce el servidor a conectar → ' input
 
         if [[ $input -lt "${#todo[@]}" ]] ||
-           [[ $input -eq "${#todo[@]}" ]]; then
-            echo -e "${VE}Se copiará:${RO} storage/app/ en ${usuarios[${input}-1]}@${servidores[${input}-1]}:/home/${usuarios[${input}-1]}/laravel/storage"
+            [[ $input -eq "${#todo[@]}" ]]; then
+            echo -e "${VE}Se copiará:${RO} storage/app/ en ${usuarios[${input} - 1]}@${servidores[${input} - 1]}:/home/${usuarios[${input} - 1]}/laravel/storage"
             echo ''
             echo -e "${RO}¿Seguro que quieres continuar?"
             read -p '  s/N → ' SN
 
-            if [[ $SN = 's' ]] || [[ $SN = 'S' ]]; then
+            if [[ $SN == 's' ]] || [[ $SN == 'S' ]]; then
                 if [[ -f "$clavePrivadaSsh" ]]; then
                     echo "clave ${clavePrivadaSsh}"
                     scp -P "$puertoRemoto" \
                         -i $clavePrivadaSsh \
-                        -r 'storage/app/' "${usuarios[${input}-1]}@${servidores[${input}-1]}:/home/${usuarios[${input}-1]}/laravel/storage"
+                        -r 'storage/app/' "${usuarios[${input} - 1]}@${servidores[${input} - 1]}:/home/${usuarios[${input} - 1]}/laravel/storage"
                 else
                     scp -P "$puertoRemoto" \
-                        -r 'storage/app/' "${usuarios[${input}-1]}@${servidores[${input}-1]}:/home/${usuarios[${input}-1]}/laravel/storage"
+                        -r 'storage/app/' "${usuarios[${input} - 1]}@${servidores[${input} - 1]}:/home/${usuarios[${input} - 1]}/laravel/storage"
                 fi
             fi
 
@@ -212,7 +212,6 @@ actualizarStorageRemoto() {
         fi
     done
 }
-
 
 ##
 ## Actualiza el storage local a partir del remoto elegido.
@@ -232,18 +231,18 @@ actualizarStorageLocal() {
         usuario=$(echo $project | cut -s -d ';' -f2)
         servidor=$(echo $project | cut -s -d ';' -f3)
 
-        if [[ "$nombre" = 'Nombre' ]]; then
+        if [[ "$nombre" == 'Nombre' ]]; then
             continue
         fi
 
         usuarios+=("$usuario")
         servidores+=("$servidor")
 
-        todo+=("$project")  ## Añado elemento al array
+        todo+=("$project") ## Añado elemento al array
         #echo ${todo[@]}  ## Muestra todo
 
         echo -e "${RO}${#todo[@]}) ${VE}${nombre}${AZ} (${usuario}@${servidor})${CL}"
-    done < "${WORKSCRIPT}/projects.csv"
+    done <"${WORKSCRIPT}/projects.csv"
 
     #echo $todo
     #echo "${todo[@]:(-1)}"  ## Muestra el último elemento
@@ -255,21 +254,21 @@ actualizarStorageLocal() {
         read -p 'Introduce el servidor a conectar → ' input
 
         if [[ $input -lt "${#todo[@]}" ]] ||
-           [[ $input -eq "${#todo[@]}" ]]; then
-            echo -e "${VE}Se copiará:${RO} ${usuarios[${input}-1]}@${servidores[${input}-1]}:/home/${usuarios[${input}-1]}/laravel/storage en storage/app/"
+            [[ $input -eq "${#todo[@]}" ]]; then
+            echo -e "${VE}Se copiará:${RO} ${usuarios[${input} - 1]}@${servidores[${input} - 1]}:/home/${usuarios[${input} - 1]}/laravel/storage en storage/app/"
             echo ''
             echo -e "${RO}¿Seguro que quieres continuar?"
             read -p '  s/N → ' SN
 
-            if [[ $SN = 's' ]] || [[ $SN = 'S' ]]; then
+            if [[ $SN == 's' ]] || [[ $SN == 'S' ]]; then
                 if [[ -f "$clavePrivadaSsh" ]]; then
                     echo "clave ${clavePrivadaSsh}"
                     scp -P "$puertoRemoto" \
                         -i $clavePrivadaSsh \
-                        -r "${usuarios[${input}-1]}@${servidores[${input}-1]}:/home/${usuarios[${input}-1]}/laravel/storage/app" 'storage'
+                        -r "${usuarios[${input} - 1]}@${servidores[${input} - 1]}:/home/${usuarios[${input} - 1]}/laravel/storage/app" 'storage'
                 else
                     scp -P "$puertoRemoto" \
-                        -r "${usuarios[${input}-1]}@${servidores[${input}-1]}:/home/${usuarios[${input}-1]}/laravel/storage/app" 'storage'
+                        -r "${usuarios[${input} - 1]}@${servidores[${input} - 1]}:/home/${usuarios[${input} - 1]}/laravel/storage/app" 'storage'
                 fi
             fi
 
@@ -281,154 +280,96 @@ actualizarStorageLocal() {
     done
 }
 
-crearClaveSsh() {
-    if [[ ! -f "${clavePrivadaSsh}" ]]; then
-        echo -e "$RO Creando clave ssh en ${clavePrivadaSsh}${CL}"
+##
+## Limpia el caché local de Laravel
+##
+laravelClearLocalCache() {
+    echo -e "$RO Limpiando cache de Laravel$CL"
 
-        ## Crear clave SSH con cifrado ecdsa fuerte.
-        ssh-keygen -f "${clavePrivadaSsh}" -t ecdsa -b 521
+    bash "${WORKSCRIPT}/scripts/laravel/clear-cache.sh"
 
-        ## Añadir clave al ssh-agent para conectar de forma transparente.
-        ssh-add "${clavePrivadaSsh}"
-    else
-        echo -e "$RO Ya existe la clave ssh, elimínala para regenerarla${CL}"
-        sleep 10
-    fi
-}
+    echo ""
+    echo -e "${VE}Se ha terminado de limpiar, pulsa intro para continuar${CL}"
 
-crearLinks() {
-    ## Crear enlace en ~/.local/bin/tss
-    echo -e "$RO Creando enlace de la herramienta desde ${PWD}/main.sh a ${HOME}/.local/bin/tss"
-
-    sleep 2
-
-    if [[ -h "${HOME}/.local/bin/tss" ]]; then
-        rm "${HOME}/.local/bin/tss"
-    fi
-
-    ln -s "${PWD}/main.sh" "${HOME}/.local/bin/tss"
-}
-
-agregarServidor() {
-  read -p "Introduce el usuario ssh remoto → " usuarioRemoto
-  read -p "Introduce el servidor ssh remoto → " servidoRemoto
-  read -p "Introduce el nombre del proyecto → " nombreProyecto
-
-  echo -e "${AZ}Has introducido lo  s siguientes datos:$CL"
-  echo -e "${VE}Nombre del proyecto:${RO} $nombreProyecto$CL"
-  echo -e "${VE}Usuario servidor ssh:${RO} $usuarioRemoto$CL"
-  echo -e "${VE}URL o IP servidor ssh:${RO} $servidoRemoto$CL"
-
-  echo -e "${RO}¿Continuar?$CL"
-  read -p "s/N  → " input
-
-  if [[ "$input" != 's' ]] && [[ "$input" != 'S' ]]; then
-      exit 0
-  fi
-
-  ## Añado el proyecto a la lista de proyectos: projects.csv
-  echo "${nombreProyecto};${usuarioRemoto};${servidoRemoto};" >> "${WORKSCRIPT}/projects.csv"
-}
-
-limpiarCacheLaravel() {
-    php artisan clear-compiled
-    php artisan cache:clear
-    php artisan config:clear
-    php artisan debugbar:clear
-    php artisan ide-helper:generate
-    php artisan ide-helper:meta
-    php artisan ide-helper:models
-    php artisan optimize:clear
-    php artisan package:discover
-    php artisan queue:flush
-    php artisan route:clear
-    php artisan view:clear
-
-    composer dump-autoload
+    read in
 }
 
 actualizarMasterRemoto() {
-  todo=()
-      usuarios=()
-      servidores=()
+    todo=()
+    usuarios=()
+    servidores=()
 
-      ## Meter en un array lista de todos los proyectos encontrados en projects
-      while read project; do
-          nombre=$(echo $project | cut -s -d ';' -f1)
-          usuario=$(echo $project | cut -s -d ';' -f2)
-          servidor=$(echo $project | cut -s -d ';' -f3)
+    ## Meter en un array lista de todos los proyectos encontrados en projects
+    while read project; do
+        nombre=$(echo $project | cut -s -d ';' -f1)
+        usuario=$(echo $project | cut -s -d ';' -f2)
+        servidor=$(echo $project | cut -s -d ';' -f3)
 
-          if [[ "$nombre" = 'Nombre' ]]; then
-              continue
-          fi
+        if [[ "$nombre" == 'Nombre' ]]; then
+            continue
+        fi
 
-          usuarios+=("$usuario")
-          servidores+=("$servidor")
+        usuarios+=("$usuario")
+        servidores+=("$servidor")
 
-          todo+=("$project")  ## Añado elemento al array
-          #echo ${todo[@]}  ## Muestra todo
+        todo+=("$project") ## Añado elemento al array
+        #echo ${todo[@]}  ## Muestra todo
 
-          echo -e "${RO}${#todo[@]}) ${VE}${nombre}${AZ} (${usuario}@${servidor})${CL}"
-      done < "${WORKSCRIPT}/projects.csv"
+        echo -e "${RO}${#todo[@]}) ${VE}${nombre}${AZ} (${usuario}@${servidor})${CL}"
+    done <"${WORKSCRIPT}/projects.csv"
 
-      #echo $todo
-      #echo "${todo[@]:(-1)}"  ## Muestra el último elemento
-      #echo "${#todo[@]}" ## Muestra longitud del array
+    #echo $todo
+    #echo "${todo[@]:(-1)}"  ## Muestra el último elemento
+    #echo "${#todo[@]}" ## Muestra longitud del array
 
+    while true :; do
+        read -p 'Introduce el servidor a conectar → ' input
 
-      while true :; do
-          read -p 'Introduce el servidor a conectar → ' input
-
-          if [[ $input -lt "${#todo[@]}" ]] ||
-             [[ $input -eq "${#todo[@]}" ]]; then
-              echo -e "${VE}Se ejecutará:${RO}
+        if [[ $input -lt "${#todo[@]}" ]] ||
+            [[ $input -eq "${#todo[@]}" ]]; then
+            echo -e "${VE}Se ejecutará:${RO}
               ssh -p "${puertoRemoto}" -i "${clavePublicaSsh}" \
-              ${usuarios[${input}-1]}@${servidores[${input}-1]} git pull && \
+              ${usuarios[${input} - 1]}@${servidores[${input} - 1]} git pull && \
               php artisan clear && \
               php artisan cache:clear && \
               php artisan config:clear && \
               php artisan route:clear && \
               composer1 dump-autoload || composer dump-autoload"
-              echo ''
-              echo -e "${RO}¿Seguro que quieres continuar?${CL}"
-              read -p '  s/N → ' SN
+            echo ''
+            echo -e "${RO}¿Seguro que quieres continuar?${CL}"
+            read -p '  s/N → ' SN
 
-              if [[ $SN = 's' ]] || [[ $SN = 'S' ]]; then
-                  if [[ -f "$clavePrivadaSsh" ]]; then
-                      echo "clave ${clavePrivadaSsh}"
+            if [[ $SN == 's' ]] || [[ $SN == 'S' ]]; then
+                if [[ -f "$clavePrivadaSsh" ]]; then
+                    echo "clave ${clavePrivadaSsh}"
 
-                      ssh -p "${puertoRemoto}" -i "${clavePrivadaSsh}" \
-                      ${usuarios[${input}-1]}@${servidores[${input}-1]} \
-                      "cd laravel; git pull
+                    ssh -t -p "${puertoRemoto}" -i "${clavePrivadaSsh}" \
+                        ${usuarios[${input} - 1]}@${servidores[${input} - 1]} \
+                        "cd laravel; git pull
                       php artisan clear && \
                       php artisan cache:clear && \
                       php artisan config:clear && \
                       php artisan route:clear && \
                       composer1 dump-autoload || composer dump-autoload"
 
+                else
 
-                  else
-                      ssh -p "${puertoRemoto}" \
-                      ${usuarios[${input}-1]}@${servidores[${input}-1]} \
-                      "cd laravel; git pull
+                    ssh -t -p "${puertoRemoto}" \
+                        ${usuarios[${input} - 1]}@${servidores[${input} - 1]} \
+                        "cd laravel; git pull
                       php artisan clear && \
                       php artisan cache:clear && \
                       php artisan config:clear && \
-                      php artisan route:clear && \
+                      php artisan route:clear; \
                       composer1 dump-autoload || composer dump-autoload"
-                  fi
-              fi
+                fi
+            fi
 
-              echo -e "${VE}Se ha terminado de ejecutar, pulsa intro para continuar${CL}"
-              read in
+            echo -e "${VE}Se ha terminado de ejecutar, pulsa intro para continuar${CL}"
+            read in
 
-              break
-          fi
-      done
-
-
-
-
-
+            break
+        fi
+    done
 
 }
