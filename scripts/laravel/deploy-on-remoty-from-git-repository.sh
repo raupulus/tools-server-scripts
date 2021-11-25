@@ -41,8 +41,72 @@
 ##
 ## Script para desplegar en servidor remoto un proyecto de laravel.
 ##
+## Recibe los siguientes parámetros:
+${urlRepositorio} ${url} ${dbuser} ${dbpassword} ${dbname}
+## $1 = URL del repositorio
+## $2 = URL de la web
+## $3 = Usuario de la base de datos
+## $4 = Contraseña de la base de datos
+## $5 = Nombre de la base de datos
 
 ####################################
 ##           FUNCTIONS            ##
 ####################################
 
+if [[ -z "$1" ]]; then
+    echo "No se ha especificado url del repositorio git"
+    exit 1
+fi
+
+urlRepositorio="$1"
+
+if [[ -z "$2" ]]; then
+    echo "No se ha especificado url del proyecto"
+    exit 1
+fi
+
+url="$2"
+
+if [[ -z "$3" ]]; then
+    echo "No se ha especificado el nombre de usuario"
+    exit 1
+fi
+
+dbuser="$3"
+
+if [[ -z "$4" ]]; then
+    echo "No se ha especificado la contraseña de la DB"
+    exit 1
+fi
+
+dbpassword="$4"
+
+if [[ -z "$5" ]]; then
+    echo "No se ha especificado el nombre de la DB"
+    exit 1
+fi
+
+dbname="$5"
+
+git clone "$url_git" "$HOME/laravel"
+cd "$HOME/laravel"
+cp "$HOME/laravel/.env.example.production" "$HOME/laravel/.env"
+
+## TODO → Aplicar configuración de .env
+
+nano "$HOME/laravel/.env"
+
+## TODO →
+
+php artisan key:generate
+composer install --no-dev
+
+## TODO → gitconfig --global ....
+
+if [[ ! -d "$HOME/laravel/public/storage" ]]; then
+    php artisan storage:link
+fi
+
+if [[ ! -d "${HOME}/${REMOTE_PATH_DEV}" ]]; then
+    ln -s "${HOME}/${REMOTE_PATH_DEV}"
+fi

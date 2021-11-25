@@ -67,7 +67,7 @@ nuevoProyectoLaravel() {
     fi
 
     ## Clonar laravel-base
-    git clone LARAVEL_BASE_GIT_URL "${rutaGIT}/${nombreProyecto}"
+    git clone $LARAVEL_BASE_GIT_URL "${rutaGIT}/${nombreProyecto}"
     cd "${rutaGIT}/${nombreProyecto}"
 
     ## Cambiar remoto
@@ -80,7 +80,8 @@ nuevoProyectoLaravel() {
     local repositoryName=$(echo $urlRepositorio | rev | cut -s -d '/' -f1 | rev | cut -s -d '.' -f1)
 
     ## Almaceno si existe la base de datos
-    checkIfExists=`mysql -u $MYSQL_USER -p --skip-column-names \
+    echo -e "${VE}Comprobando si existe la DB local${RO} ${repositoryName}${VE}, introduce la clave mysql:${CL}"
+   checkIfExists=`mysql -u $MYSQL_USER -p --skip-column-names \
                      -e "SHOW DATABASES LIKE '${repositoryName}'"`
 
     ## Crear base de datos en caso de no existir
@@ -104,14 +105,40 @@ nuevoProyectoLaravel() {
     ssh-copy-id -p "${puertoRemoto}" -i "${clavePublicaSsh}" \
         "${usuarioRemoto}@${servidoRemoto}"
 
-    ## TODO → Conectar al remoto, desplegar y configurar
+    ## Añado el proyecto a la lista de proyectos: projects.csv
+    echo "${nombreProyecto};${usuarioRemoto};${servidoRemoto};${repositoryName}" >>"${WORKSCRIPT}/projects.csv"
+
+    ## Sube al servidor remoto el repositorio y despliega el proyecto
     read -p '¿Subir al remoto? s/N → ' input
     if [[ "$input" == 's' ]] || [[ "$input" == 'S' ]]; then
-        echo 'no implementada esta parte'
-    fi
 
-    ## Añado el proyecto a la lista de proyectos: projects.csv
-    echo "${nombreProyecto};${nombreProyecto};${servidoRemoto};${repositoryName}" >>"${WORKSCRIPT}/projects.csv"
+        ## TODO → Pedir datos de la db en servidor y crearla, también editar .env
+
+        url=''
+        while [[ "$url" == '' ]]; do
+            read -p 'Introduce la URL de la web final → ' url
+        done
+
+        dbuser="${usuarioRemoto}_user"
+        while [[ "$dbuser" == '' ]]; do
+            read -p 'Introduce el usuario de la base de datos en el servidor → ' $dbuser
+        done
+
+        dbname="${usuarioRemoto}_mysql"
+        while [[ "$dbname" == '' ]]; do
+            read -p 'Introduce el nombre de la base de datos en el servidor → '  $dbname
+        done
+
+        dbpassword=''
+        while [[ "$dbpassword" == '' ]]; do
+            read -p 'Introduce la contraseña de la base de datos en el servidor → ' $dbpassword
+        done
+
+        ssh -t -p "${puertoRemoto}" -i "${clavePrivadaSsh}" \
+            "${usuarioRemoto}@${servidoRemoto}" \
+            'bash -s' < "${WORKSCRIPT}/scripts/laravel/deploy-on-remoty-from
+            -git-repository.sh ${urlRepositorio} ${url} ${dbuser} ${dbpassword} ${dbname}"
+    fi
 }
 
 ##
@@ -129,7 +156,7 @@ laravelUploadStorage() {
 
         if [[ $input -lt "${#PROJECTS[@]}" ]] ||
             [[ $input -eq "${#PROJECTS[@]}" ]]; then
-            echo -e "${VE}Se copiará:${RO} storage/app/ en ${PROJECTS_USERS[${input} - 1]}@${PROJECTS_SERVERS[${input}]}:/home/${PROJECTS_USERS[${input}]}/laravel/storage"
+            echo -e "${VE}Se copiará:${RO} storage/app/ en ${PROJECTS_USERS[${input}]}@${PROJECTS_SERVERS[${input}]}:/home/${PROJECTS_USERS[${input}]}/laravel/storage"
             echo ''
             echo -e "${RO}¿Seguro que quieres continuar?"
             read -p '  s/N → ' SN
