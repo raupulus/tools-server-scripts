@@ -130,7 +130,7 @@ nuevoProyectoLaravel() {
         done
 
         dbpassword=''
-        while [[ "$dbpassword" == '' ]]; do
+        while [[ -z "$dbpassword" ]]; do
             read -p 'Introduce la contraseña de la base de datos en el servidor → ' $dbpassword
         done
 
