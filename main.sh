@@ -59,8 +59,8 @@ if [[ ! -f "$WORKSCRIPT/projects.csv" ]]; then
 fi
 
 ## Create temporal folder.
-if [[ ! -d '/tmp/tss' ]]; then
-  mkdir '/tmp/tss'
+if [[ ! -d "/tmp/${TOOL_ALIAS}" ]]; then
+  mkdir "/tmp/${TOOL_ALIAS}"
 fi
 
 ####################################
@@ -100,6 +100,7 @@ readProjects
 menuPrincipal() {
     while true :; do
         #clear
+        echo ''
 
         local descripcion='Menú Principal
             1) Conectar a Servidor

@@ -56,6 +56,11 @@ installTool() {
 
     sleep 2
 
+    if [[ -z $TOOL_ALIAS ]]; then
+        echo -e "$RO NO HAY ALIAS ESTABLECIDO EN EL ARCHIVO$AM .env$RO REVÍSALO$CL"
+        return
+    fi
+
     if [[ -L "${HOME}/.local/bin/tss" ]]; then
         rm "${HOME}/.local/bin/tss"
     fi

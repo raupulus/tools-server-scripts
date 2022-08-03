@@ -57,8 +57,19 @@ addNewServer() {
 
     echo -e "${AZ}Has introducido lo  s siguientes datos:$CL"
     echo -e "${VE}Nombre del proyecto:${RO} $nombreProyecto$CL"
-    echo -e "${VE}Usuario servidor ssh:${RO} $usuarioRemoto$CL"
+    echo -e "${VE}Usuario servidor al conectar por ssh:${RO} $usuarioRemoto$CL"
     echo -e "${VE}URL o IP servidor ssh:${RO} $servidoRemoto$CL"
+
+
+    ## TODO: añadir pregunta por repositorio y clonarlo si lo añade, además crear db
+
+    ## TODO, registrar puerto (si ignora, el por defecto)
+
+    ## TODO: registrar nombre db remota, si ignora será el nombre del usuario
+
+    ## TODO: Añadir función para preparar proyecto a partir del repositorio
+    ##existente, esto es tenerlo en la lista projects.csv descargarlo,
+    ##prepararlo y crear db
 
     echo -e "${RO}¿Continuar?$CL"
     read -p "s/N  → " input
