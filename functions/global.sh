@@ -51,7 +51,7 @@
 ## para ejecutarlo desde cualquier directorio mediante "tss"
 ##
 installTool() {
-    ## Crear enlace en ~/.local/bin/tss
+    ## Crear enlace en ~/.local/bin/${TOOL_ALIAS}
     echo -e "$RO Creando enlace de la herramienta desde ${PWD}/main.sh a ${HOME}/.local/bin/tss"
 
     sleep 2
@@ -61,9 +61,9 @@ installTool() {
         return
     fi
 
-    if [[ -L "${HOME}/.local/bin/tss" ]]; then
-        rm "${HOME}/.local/bin/tss"
+    if [[ -L "${HOME}/.local/bin/${TOOL_ALIAS}" ]]; then
+        rm "${HOME}/.local/bin/${TOOL_ALIAS}"
     fi
 
-    ln -s "${PWD}/main.sh" "${HOME}/.local/bin/tss"
+    ln -s "${WORKSCRIPT}/main.sh" "${HOME}/.local/bin/${TOOL_ALIAS}"
 }

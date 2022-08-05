@@ -46,6 +46,12 @@ VERSION='0.1'
 
 dir_Script=$(readlink -f $0)
 WORKSCRIPT=$(dirname $dir_Script)
+PATH_BACKUPS="${WORKSCRIPT}/backups"
+
+## Create backups folder.
+if [[ ! -d "${PATH_BACKUPS}" ]]; then
+  mkdir "${PATH_BACKUPS}"
+fi
 
 ## Check if environment variables are set
 if [[ ! -f "$WORKSCRIPT/.env" ]]; then
@@ -56,11 +62,6 @@ fi
 ## Create template projects file.
 if [[ ! -f "$WORKSCRIPT/projects.csv" ]]; then
   echo 'Nombre;Usuario;Servidor;' > $WORKSCRIPT/projects.csv
-fi
-
-## Create temporal folder.
-if [[ ! -d "/tmp/${TOOL_ALIAS}" ]]; then
-  mkdir "/tmp/${TOOL_ALIAS}"
 fi
 
 ####################################
@@ -90,6 +91,11 @@ source "${WORKSCRIPT}/functions/mysql.sh"
 ####################################
 ##        PRECONFIGURATION        ##
 ####################################
+
+## Create temporal folder.
+if [[ ! -d "/tmp/${TOOL_ALIAS}" ]]; then
+  mkdir "/tmp/${TOOL_ALIAS}"
+fi
 
 ## Read projects file and extract data: PROJECTS, PROJECTS_USERS, PROJECTS_SERVERS
 readProjects
