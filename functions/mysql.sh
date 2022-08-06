@@ -87,6 +87,9 @@ mysqlBackup() {
   mysqldump -h $host -P $port -u $user -p$password $database > "/tmp/${TOOL_ALIAS}/mysql/${backupName}" && cp "/tmp/${TOOL_ALIAS}/mysql/${backupName}" "${PATH_BACKUPS}/$backupName"
 }
 
+##
+## Crea un backup de una base de datos local
+##
 mysqlBackupLocal() {
     showProjects
 
@@ -96,17 +99,17 @@ mysqlBackupLocal() {
         if [[ $input -lt "${#PROJECTS[@]}" ]] ||
            [[ $input -eq "${#PROJECTS[@]}" ]]; then
 
-            database=${PROJECTS_USERS[$input]}
+            database=${PROJECTS_REPOSITORIES[$input]}
 
             checkIfExists=`mysql -u $MYSQL_USER -p --skip-column-names \
              -e "SHOW DATABASES LIKE '${database}'"`
 
             if [[ -z "${PROJECTS[$input]}" ]] || [[ -z $checkIfExists ]]; then
-                echo -e "${VE}No existe la base de datos${RO} ${PROJECTS_USERS[${input}]}${CL}"
+                echo -e "${VE}No existe la base de datos${RO} ${database}${CL}"
                 continue
             fi
 
-            echo -e "${VE}Se generará un backup de la DB ${PROJECTS_USERS[${input}]}"
+            echo -e "${VE}Se generará un backup de la DB ${database}"
             echo ''
             echo -e "${RO}¿Seguro que quieres continuar?${CL}"
             read -p '  s/N → ' SN
@@ -114,6 +117,44 @@ mysqlBackupLocal() {
             ## Realizo el backup con los datos
             if [[ $SN == 's' ]] || [[ $SN == 'S' ]]; then
                 mysqlBackup 'localhost' $MYSQL_USER '' $database
+            fi
+
+            echo -e "${VE}Proceso de Backup concluido, pulsa intro para continuar${CL}"
+            read in
+
+            break
+        fi
+    done
+}
+
+##
+## Crea un backup de una base de datos remota.
+##
+mysqlBackupRemote() {
+    showProjects
+
+    #TODO: Creo que hay que usar el nombre del usuario del servidor con "_user"
+    #TODO: Revisar y establecer patrón, username_user y username_mysql
+    #TODO: Plantear también realizarlo mediante ssh, así no necesito password db
+
+    while true :; do
+        read -p 'Introduce proyecto para crear el backup → ' input
+
+        if [[ $input -lt "${#PROJECTS[@]}" ]] ||
+           [[ $input -eq "${#PROJECTS[@]}" ]]; then
+
+            local user="${PROJECTS_USERS[$input]}"
+            local server="${PROJECTS_SERVERS[$input]}"
+            local database="${PROJECTS_REPOSITORIES[$input]}_mysql"
+
+            echo -e "${VE}Se generará un backup de la DB ${database} desde el servidor ${server} con el usuario ${user}"
+            echo ''
+            echo -e "${RO}¿Seguro que quieres continuar?${CL}"
+            read -p '  s/N → ' SN
+
+            ## Realizo el backup con los datos
+            if [[ $SN == 's' ]] || [[ $SN == 'S' ]]; then
+                mysqlBackup $server $user '' $database
             fi
 
             echo -e "${VE}Proceso de Backup concluido, pulsa intro para continuar${CL}"
