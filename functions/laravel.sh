@@ -46,6 +46,15 @@
 ##           FUNCTIONS            ##
 ####################################
 
+##
+## Reinstancia un proyecto existente a partir de un repositorio existente y
+## estando dado de alta ya en el listado de projects.csv
+##
+reinstateProject() {
+    #showProjects
+
+    echo 'WIP'
+}
 
 nuevoProyectoLaravel() {
     read -p "Introduce el nombre del proyecto → " nombreProyecto

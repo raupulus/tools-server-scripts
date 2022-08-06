@@ -124,6 +124,7 @@ menuPrincipal() {
             k) Añadir clave SSH pública al servidor
             l) Limpiar caché de Laravel
             n) Nuevo Proyecto desde Laravel Base
+            r) Reinstanciar proyecto existente, clonado, dependencias y db (Aún no implementado)
             p) Publicar WEB (Aún no implementado)
             s) Crear clave ssh en tu equipo local
 
@@ -153,6 +154,7 @@ menuPrincipal() {
             k) sshAddKeyToRemoteServer;;
             l) laravelClearLocalCache;;
             n) nuevoProyectoLaravel;;
+            r) reinstateProject;;
             s) sshCreateLocalKey;;
 
 
