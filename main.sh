@@ -61,7 +61,7 @@ fi
 
 ## Create template projects file.
 if [[ ! -f "$WORKSCRIPT/projects.csv" ]]; then
-  echo 'Nombre;Usuario;Servidor;' > $WORKSCRIPT/projects.csv
+  echo 'Nombre;Usuario;Servidor;Repositorio' > $WORKSCRIPT/projects.csv
 fi
 
 ####################################

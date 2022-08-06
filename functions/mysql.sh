@@ -76,15 +76,15 @@ mysqlBackup() {
     return 1
   fi
 
-  if [[ ! -d '/tmp/tss/mysql' ]]; then
-    mkdir -p '/tmp/tss/mysql'
+  if [[ ! -d "/tmp/${TOOL_ALIAS}/mysql" ]]; then
+    mkdir -p "/tmp/${TOOL_ALIAS}/mysql"
   fi
 
   backupName="Backup-${database}-$(date +%F_%H.%M.%S)"
 
   echo -e "${RO}Backing up${RO} ${database}${CL}"
 
-  mysqldump -h $host -P $port -u $user -p$password $database > "/tmp/tss/mysql/${backupName}" && cp "/tmp/tss/mysql/${backupName}" "${PATH_BACKUPS}/$backupName"
+  mysqldump -h $host -P $port -u $user -p$password $database > "/tmp/${TOOL_ALIAS}/mysql/${backupName}" && cp "/tmp/${TOOL_ALIAS}/mysql/${backupName}" "${PATH_BACKUPS}/$backupName"
 }
 
 mysqlBackupLocal() {
@@ -97,8 +97,6 @@ mysqlBackupLocal() {
            [[ $input -eq "${#PROJECTS[@]}" ]]; then
 
             database=${PROJECTS_USERS[$input]}
-
-            #TODO → Plantear guardar nombre del proyecto en git dentro de projects.csv
 
             checkIfExists=`mysql -u $MYSQL_USER -p --skip-column-names \
              -e "SHOW DATABASES LIKE '${database}'"`

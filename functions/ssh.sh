@@ -152,38 +152,48 @@ sshConnectAndExecuteScript() {
     fi
 
     echo "Connecting to $host"
+    #ssh root@MachineB 'bash -s' < local_script.sh
     #sshpass -p "$password" ssh -p $port -o StrictHostKeyChecking=no $user@$host "$script"
 }
 
+##
+## Envía uno o más comandos para ser ejecutados en el servidor.
+##
+## $1 Nombre o ip del servidor a conectar.
+## $2 Nombre del usuario a conectar.
+## $3 El comando o los comandos a ejecutar en el servidor, debe ser una cadena.
+##
 sshConnectAndExecuteCommands() {
     local host=$1
-    local commands=$2
-    local user=$3
-    local password=$4
-    local port=$5
-
-    if [[ -z "$port" ]]; then
-        port=22
-    fi
-
-    if [[ -z "$user" ]]; then
-        user=root
-    fi
-
-    if [[ -z "$password" ]]; then
-        password=
-    fi
-
-    if [[ -z "$commands" ]]; then
-        echo "No commands specified"
-        return 1
-    fi
+    local user=$2
+    local commands=$3
 
     if [[ -z "$host" ]]; then
         echo "No host specified"
+
+        return 1
+    fi
+
+    if [[ -z "$user" ]]; then
+        echo "No user specified"
+
+        return 1
+    fi
+
+    if [[ -z "$commands" ]]; then
+        echo "No command specified"
+
         return 1
     fi
 
     echo "Connecting to $host"
-    #sshpass -p "$password" ssh -p $port -o StrictHostKeyChecking=no $user@$host "$commands"
+
+    if [[ -f "$clavePrivadaSsh" ]]; then
+        ssh -i "$clavePrivadaSsh" \
+            ${user}@${host]} \
+            -p $puertoRemoto \
+            "${commands}"
+    else
+        ssh ${user}@${host} -p $puertoRemoto "${commands}"
+    fi
 }

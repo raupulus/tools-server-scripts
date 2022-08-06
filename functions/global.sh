@@ -52,7 +52,7 @@
 ##
 installTool() {
     ## Crear enlace en ~/.local/bin/${TOOL_ALIAS}
-    echo -e "$RO Creando enlace de la herramienta desde ${PWD}/main.sh a ${HOME}/.local/bin/tss"
+    echo -e "$RO Creando enlace de la herramienta desde ${PWD}/main.sh a ${HOME}/.local/bin/${TOOL_ALIAS}"
 
     sleep 2
 
@@ -66,4 +66,24 @@ installTool() {
     fi
 
     ln -s "${WORKSCRIPT}/main.sh" "${HOME}/.local/bin/${TOOL_ALIAS}"
+}
+
+##
+## Reemplaza según un patrón cadenas dentro de un archivo
+## $1 Patrón para reemplazar la cadena.
+## $2 Archivo sobre el que se actúa
+##
+strFileReplace() {
+    PATTERN=$1
+    FILE=$2
+
+    if [[ -z $PATTERN ]] || [[ -z $FILE ]];then
+        return
+    fi
+
+    if [[ $SO = 'macos' ]]; then
+        sed -r -E -i '' "${PATTERN}" "${FILE}"
+    else
+        sed -r -i "${PATTERN}" "${FILE}"
+    fi
 }

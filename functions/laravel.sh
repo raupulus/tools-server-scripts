@@ -81,7 +81,7 @@ nuevoProyectoLaravel() {
 
     ## Almaceno si existe la base de datos
     echo -e "${VE}Comprobando si existe la DB local${RO} ${repositoryName}${VE}, introduce la clave mysql:${CL}"
-   checkIfExists=`mysql -u $MYSQL_USER -p --skip-column-names \
+    checkIfExists=`mysql -u $MYSQL_USER -p --skip-column-names \
                      -e "SHOW DATABASES LIKE '${repositoryName}'"`
 
     ## Crear base de datos en caso de no existir
@@ -90,8 +90,22 @@ nuevoProyectoLaravel() {
         mysql -u $MYSQL_USER -p -e "CREATE DATABASE ${repositoryName}"
     fi
 
-    ## Editar .env local TODO → modificar con "sed" variables personalizadas (db, localhost, etc)
-    cp .env.example .env
+    local ENV_FILE="${PWD}/.env"
+
+    if [[ ! -f "${ENV_FILE}" ]]; then
+        cp "${PWD}/.env.example" "${ENV_FILE}"
+    fi
+
+    ## Edita variables de entorno del archivo .env
+    strFileReplace 's/^#?[[:space:]]*APP_NAME[[:space:]]*=.*$/APP_NAME='${repositoryName}'/g' $ENV_FILE
+    strFileReplace 's/^#?[[:space:]]*APP_ENV[[:space:]]*=.*$/APP_ENV=local/g' $ENV_FILE
+    strFileReplace 's/^#?[[:space:]]*APP_ENV[[:space:]]*=.*$/APP_ENV=local/g' $ENV_FILE
+    strFileReplace 's/^#?[[:space:]]*APP_DEBUG[[:space:]]*=.*$/APP_DEBUG=true/g' $ENV_FILE
+    strFileReplace 's/^#?[[:space:]]*APP_URL[[:space:]]*=.*$/APP_URL=http://localhost:8000/g' $ENV_FILE
+    strFileReplace 's/^#?[[:space:]]*DB_DATABASE[[:space:]]*=.*$/DB_DATABASE='${repositoryName}'/g' $ENV_FILE
+    strFileReplace 's/^#?[[:space:]]*DB_USERNAME[[:space:]]*=.*$/DB_USERNAME='${$MYSQL_USER}'/g' $ENV_FILE
+    strFileReplace 's/^#?[[:space:]]*DB_PASSWORD[[:space:]]*=.*$/DB_PASSWORD='${$MYSQL_USER}'/g' $ENV_FILE
+
     nano .env
 
     #TODO → Parametrizar la configuración por tipo de proyecto/servidor?
@@ -136,8 +150,7 @@ nuevoProyectoLaravel() {
 
         ssh -t -p "${puertoRemoto}" -i "${clavePrivadaSsh}" \
             "${usuarioRemoto}@${servidoRemoto}" \
-            'bash -s' < "${WORKSCRIPT}/scripts/laravel/deploy-on-remoty-from
-            -git-repository.sh ${urlRepositorio} ${url} ${dbuser} ${dbpassword} ${dbname}"
+            'bash -s' < "${WORKSCRIPT}/scripts/laravel/deploy-on-remoty-from-git-repository.sh ${urlRepositorio} ${url} ${dbuser} ${dbpassword} ${dbname}"
     fi
 }
 
@@ -147,6 +160,9 @@ nuevoProyectoLaravel() {
 laravelUploadStorage() {
     if [[ ! -d "${PWD}/storage" ]]; then
         echo -e "${RO}No se encuentra el directorio storage en este proyecto$CL"
+        read -p "Asegúrate de estar en el directorio raíz del proyecto. (Enter para volver)"
+
+        return
     fi
 
     showProjects
@@ -172,6 +188,12 @@ laravelUploadStorage() {
                         -r 'storage/app/' "${PROJECTS_USERS[${input}]}@${PROJECTS_SERVERS[${input}]}:/home/${PROJECTS_USERS[${input}]}/laravel/storage"
                 fi
             fi
+
+            ## Corrige permisos para archivos subidos
+            echo -e "${VE}Corrigiendo Permisos tras la subida${CL}"
+            sshConnectAndExecuteCommands ${PROJECTS_SERVERS[${input}]} ${PROJECTS_USERS[${input}]} 'find  $HOME/laravel/ -type d -exec chmod 755 {} \;'
+
+            sshConnectAndExecuteCommands ${PROJECTS_SERVERS[${input}]} ${PROJECTS_USERS[${input}]} 'find  $HOME/laravel/ -type f -exec chmod 644 {} \;'
 
             echo -e "${VE}Se ha terminado de copiar, pulsa intro para continuar${CL}"
             read in
