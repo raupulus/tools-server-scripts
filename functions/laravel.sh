@@ -51,7 +51,67 @@
 ## estando dado de alta ya en el listado de projects.csv
 ##
 reinstateProject() {
-    #showProjects
+    showProjects
+
+    while true :; do
+        read -p 'Introduce el proyecto a instanciar en tu equipo → ' input
+
+        if [[ $input -lt "${#PROJECTS[@]}" ]] ||
+            [[ $input -eq "${#PROJECTS[@]}" ]]; then
+
+            local repositoryName="${PROJECTS_REPOSITORIES[$input]}"
+            local repositoryUrl="${URL_REPOSITORY}/${repositoryName}.git"
+
+            echo -e "${AM}Clonando repositorio ${RO}${repositoryUrl}${AM} en ${RO}${rutaGIT}/${repositoryName}$CL"
+            git clone "${repositoryUrl}" "${rutaGIT}/${repositoryName}"
+
+            cd "${rutaGIT}/${repositoryName}"
+
+            ## Almaceno si existe la base de datos
+            echo -e "${VE}Comprobando si existe la DB local${RO} ${repositoryName}${VE}, introduce la clave mysql:${CL}"
+            checkIfExists=`mysql -u $MYSQL_USER -p --skip-column-names \
+                             -e "SHOW DATABASES LIKE '${repositoryName}'"`
+
+            ## Crear base de datos en caso de no existir
+            if [[ -z $checkIfExists ]]; then
+                echo -e "${VE}Creando base de datos${RO} ${repositoryName}${CL}"
+                mysql -u $MYSQL_USER -p -e "CREATE DATABASE ${repositoryName}"
+            fi
+
+            local ENV_FILE="${PWD}/.env"
+
+            if [[ ! -f "${ENV_FILE}" ]]; then
+                cp "${PWD}/.env.example" "${ENV_FILE}"
+            fi
+
+            ## Edita variables de entorno del archivo .env
+            strFileReplace 's/^#?[[:space:]]*APP_NAME[[:space:]]*=.*$/APP_NAME='${repositoryName}'/g' $ENV_FILE
+            strFileReplace 's/^#?[[:space:]]*APP_ENV[[:space:]]*=.*$/APP_ENV=local/g' $ENV_FILE
+            strFileReplace 's/^#?[[:space:]]*APP_ENV[[:space:]]*=.*$/APP_ENV=local/g' $ENV_FILE
+            strFileReplace 's/^#?[[:space:]]*APP_DEBUG[[:space:]]*=.*$/APP_DEBUG=true/g' $ENV_FILE
+            strFileReplace 's/^#?[[:space:]]*APP_URL[[:space:]]*=.*$/APP_URL=http:\/\/localhost:8000/g' $ENV_FILE
+            strFileReplace 's/^#?[[:space:]]*DB_DATABASE[[:space:]]*=.*$/DB_DATABASE='${repositoryName}'/g' $ENV_FILE
+            strFileReplace 's/^#?[[:space:]]*DB_USERNAME[[:space:]]*=.*$/DB_USERNAME='${MYSQL_USER}'/g' $ENV_FILE
+            strFileReplace 's/^#?[[:space:]]*DB_PASSWORD[[:space:]]*=.*$/DB_PASSWORD='${MYSQL_USER}'/g' $ENV_FILE
+
+            #nano .env
+
+            #TODO → Parametrizar la configuración por tipo de proyecto/servidor?
+            #TODO: ¿Cambiar el comando postinstalación y poner el de reparar?
+            composer1 install || composer install
+
+            if [[ $LARAVEL_PHP_POST_INSTALL_COMMAND != '' ]]; then
+                eval "$LARAVEL_PHP_POST_INSTALL_COMMAND"
+            fi
+
+            ## TODO: DESCARGAR DB DEL SERVIDOR
+
+            echo -e "$VE Pulsa cualquier tecla para continuar${CL}"
+
+            read in
+            break
+        fi
+    done
 
     echo 'WIP'
 }
@@ -110,12 +170,12 @@ nuevoProyectoLaravel() {
     strFileReplace 's/^#?[[:space:]]*APP_ENV[[:space:]]*=.*$/APP_ENV=local/g' $ENV_FILE
     strFileReplace 's/^#?[[:space:]]*APP_ENV[[:space:]]*=.*$/APP_ENV=local/g' $ENV_FILE
     strFileReplace 's/^#?[[:space:]]*APP_DEBUG[[:space:]]*=.*$/APP_DEBUG=true/g' $ENV_FILE
-    strFileReplace 's/^#?[[:space:]]*APP_URL[[:space:]]*=.*$/APP_URL=http://localhost:8000/g' $ENV_FILE
+    strFileReplace 's/^#?[[:space:]]*APP_URL[[:space:]]*=.*$/APP_URL=http:\/\/localhost:8000/g' $ENV_FILE
     strFileReplace 's/^#?[[:space:]]*DB_DATABASE[[:space:]]*=.*$/DB_DATABASE='${repositoryName}'/g' $ENV_FILE
-    strFileReplace 's/^#?[[:space:]]*DB_USERNAME[[:space:]]*=.*$/DB_USERNAME='${$MYSQL_USER}'/g' $ENV_FILE
-    strFileReplace 's/^#?[[:space:]]*DB_PASSWORD[[:space:]]*=.*$/DB_PASSWORD='${$MYSQL_USER}'/g' $ENV_FILE
+    strFileReplace 's/^#?[[:space:]]*DB_USERNAME[[:space:]]*=.*$/DB_USERNAME='${MYSQL_USER}'/g' $ENV_FILE
+    strFileReplace 's/^#?[[:space:]]*DB_PASSWORD[[:space:]]*=.*$/DB_PASSWORD='${MYSQL_USER}'/g' $ENV_FILE
 
-    nano .env
+    #nano .env
 
     #TODO → Parametrizar la configuración por tipo de proyecto/servidor?
     composer1 install || composer install
