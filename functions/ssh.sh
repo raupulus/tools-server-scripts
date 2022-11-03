@@ -190,7 +190,7 @@ sshConnectAndExecuteCommands() {
 
     if [[ -f "$clavePrivadaSsh" ]]; then
         ssh -i "$clavePrivadaSsh" \
-            ${user}@${host]} \
+            ${user}@${host} \
             -p $puertoRemoto \
             "${commands}"
     else
