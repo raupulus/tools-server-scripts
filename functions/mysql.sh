@@ -105,7 +105,7 @@ mysqlBackupLocal() {
              -e "SHOW DATABASES LIKE '${database}'"`
 
             if [[ -z "${PROJECTS[$input]}" ]] || [[ -z $checkIfExists ]]; then
-                echo -e "${VE}No existe la base de datos${RO} ${database}${CL}"
+                echo -e "${VE}No existe la base de datos${RO} "${database}"${CL}"
                 continue
             fi
 
@@ -116,7 +116,7 @@ mysqlBackupLocal() {
 
             ## Realizo el backup con los datos
             if [[ $SN == 's' ]] || [[ $SN == 'S' ]]; then
-                mysqlBackup 'localhost' $MYSQL_USER '' $database
+                mysqlBackup 'localhost' "${MYSQL_USER}" '' "${database}"
             fi
 
             echo -e "${VE}Proceso de Backup concluido, pulsa intro para continuar${CL}"
