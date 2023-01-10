@@ -11,3 +11,4 @@ __pycache__
 __init__.py
 /projects.csv
 /.env
+.DS_Store
